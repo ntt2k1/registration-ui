@@ -17,7 +17,7 @@ const Home = () => {
     } else {
       toast.success('Login successfully');
       var decoded = jwt_decode(token);
-      setUsername(decoded.userID);
+      setUsername(decoded.userName);
     }
   }, [navigate]);
 

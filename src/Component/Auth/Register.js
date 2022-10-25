@@ -47,6 +47,7 @@ export default function Register() {
     const data = new FormData(event.currentTarget);
     const dataValue = {
       username: data.get('username'),
+      nickname: data.get('nickname'),
       password: data.get('password'),
       confirmPassword: data.get('confirmPassword')
     };
@@ -111,6 +112,16 @@ export default function Register() {
                 margin="normal"
                 required
                 fullWidth
+                id="nickname"
+                label="Your Nickname"
+                name="nickname"
+                autoComplete="nickname"
+                autoFocus
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
                 name="password"
                 label="Password"
                 type="password"
@@ -147,7 +158,7 @@ export default function Register() {
                 </Grid>
                 <Grid item>
                   <Link href="/" variant="body2">
-                    {"Already had an account? Sign In"}
+                    {'Already had an account? Sign In'}
                   </Link>
                 </Grid>
               </Grid>
