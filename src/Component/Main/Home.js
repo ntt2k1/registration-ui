@@ -11,15 +11,10 @@ const Home = () => {
 
   useEffect(() => {
     let token = sessionStorage.getItem('auth');
-
-    if (!token) {
-      navigate('/');
-    } else {
-      toast.success('Login successfully');
-      var decoded = jwt_decode(token);
-      setUsername(decoded.userName);
-    }
-  }, [navigate]);
+    toast.success('Login successfully');
+    var decoded = jwt_decode(token);
+    setUsername(decoded.userName);
+  }, []);
 
   return (
     <div>
