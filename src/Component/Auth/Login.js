@@ -15,6 +15,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+
 
 function Copyright(props) {
   return (
@@ -36,20 +38,19 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-export default function SignInSide() {
+export default function SignInSide({login}) {
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm({ mode: 'onChange' });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const dataValue = {
-      username: data.get('username'),
-      password: data.get('password'),
-    };
+  const onSubmit = async (data) => {
     let response = null;
     try {
       response = await toast.promise(
-        axios.post(`${process.env.REACT_APP_URL}/api/auth/login`, dataValue),
+        axios.post(`${process.env.REACT_APP_URL}/api/auth/login`, data),
         {
           pending: 'Processing ...',
           success: 'Login successfully',
@@ -57,9 +58,10 @@ export default function SignInSide() {
       );
 
       if (response.data.success) {
-        navigate('/home');
         console.log('SUCCESS');
         sessionStorage.setItem('auth', response.data.accessToken);
+        login(response.data.accessToken);
+        navigate('/home', {replace: true});
       }
     } catch (err) {
       console.log(err.message);
@@ -94,7 +96,6 @@ export default function SignInSide() {
               mx: 4,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
             }}
           >
             <Avatar sx={{ m: 1, bgcolor: '#00FF00' }}>
@@ -105,8 +106,7 @@ export default function SignInSide() {
             </Typography>
             <Box
               component="form"
-              noValidate
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit)}
               sx={{ mt: 1 }}
             >
               <TextField
@@ -118,7 +118,26 @@ export default function SignInSide() {
                 name="username"
                 autoComplete="username"
                 autoFocus
+                {...register('username', {
+                  required: true,
+                  pattern: /^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/,
+                })}
               />
+              {errors.username?.type === 'required' && (
+                <Typography
+                  margin="normal"
+                  fullWidth
+                  style={{ color: 'red', fontSize: '13px' }}
+                >
+                  Username is required
+                </Typography>
+              )}
+              {errors.username?.type === 'pattern' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Username/Email format is not true
+                </p>
+              )}
+
               <TextField
                 margin="normal"
                 required
@@ -128,7 +147,22 @@ export default function SignInSide() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                {...register('password', {
+                  required: true,
+                  pattern:
+                    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                })}
               />
+              {errors.password?.type === 'required' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Password is required
+                </p>
+              )}
+              {errors.password?.type === 'pattern' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Password format is not true
+                </p>
+              )}
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
@@ -138,6 +172,7 @@ export default function SignInSide() {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                disabled={!isValid}
               >
                 Sign In
               </Button>

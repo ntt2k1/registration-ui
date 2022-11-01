@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-function Header() {
+function Header({ logout }) {
   const navigate = useNavigate();
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -41,6 +41,7 @@ function Header() {
   const handleMenu = (setting) => {
     if (setting === 'Logout') {
       sessionStorage.removeItem('auth');
+      logout();
       navigate('/');
     }
   };
@@ -159,7 +160,10 @@ function Header() {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography onClick={() => handleMenu(setting)} textAlign="center">
+                  <Typography
+                    onClick={() => handleMenu(setting)}
+                    textAlign="center"
+                  >
                     {setting}
                   </Typography>
                 </MenuItem>

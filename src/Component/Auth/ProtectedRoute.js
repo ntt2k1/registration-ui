@@ -1,11 +1,11 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from 'react-router-dom';
 
-const ProtectedRoute = ({ isAllow, children }) => {
-  if (!isAllow) {
-    return <Navigate to="/" replace />;
+const ProtectedRoute = ({ token, redirectPath = '/', children }) => {
+  if (!token) {
+    return <Navigate to={redirectPath} replace />;
   }
 
-  return children;
+  return children ? children : <Outlet />;
 };
 
-export default ProtectedRoute
+export default ProtectedRoute;

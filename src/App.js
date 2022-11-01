@@ -1,40 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Login from './Component/Auth/Login';
 import Register from './Component/Auth/Register';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './Component/Main/Home';
 import ProtectedRoute from './Component/Auth/ProtectedRoute';
+import { Routes, Route } from 'react-router-dom';
+import { QueryClientProvider, QueryClient } from 'react-query';
+
+const queryClient = new QueryClient();
 
 const App = () => {
-  const [isAllow, setIsAllow] = useState(false);
-  let token = sessionStorage.getItem('auth');
+  const [token, setToken] = useState(sessionStorage.getItem('auth'));
 
-  useEffect(() => {
-    if (token) {
-      setIsAllow(true);
-    }
-  }, [token]);
+  const handleLogin = (data) => setToken(data);
+  const handleLogout = () => setToken(null);
 
-  const router = createBrowserRouter([
-    {
-      path: '/',
-      element: <Login />,
-    },
-    {
-      path: '/register',
-      element: <Register />,
-    },
-    {
-      path: '/home',
-      element: (
-        <ProtectedRoute isAllow={isAllow}>
-          <Home />
-        </ProtectedRoute>
-      ),
-    },
-  ]);
-
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Routes>
+        <Route index element={<Login login={handleLogin} />} />
+        <Route path="" element={<Login login={handleLogin} />} />
+        <Route
+          path="home"
+          element={
+            <ProtectedRoute token={token}>
+              <Home logout={handleLogout} token={token} />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="register" element={<Register />} />
+        <Route path="*" element={<p>There's nothing here: 404!</p>} />
+      </Routes>
+    </QueryClientProvider>
+  );
 };
 
 export default App;

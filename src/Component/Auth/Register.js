@@ -13,10 +13,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ToastContainer, toast } from 'react-toastify';
-import axios from 'axios'
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-
+import { useForm } from 'react-hook-form';
 
 function Copyright(props) {
   return (
@@ -40,21 +39,18 @@ const theme = createTheme();
 
 export default function Register() {
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
 
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const dataValue = {
-      username: data.get('username'),
-      nickname: data.get('nickname'),
-      password: data.get('password'),
-      confirmPassword: data.get('confirmPassword')
-    };
+  const onSubmit = async (data) => {
     let response = null;
     try {
       response = await toast.promise(
-        axios.post(`${process.env.REACT_APP_URL}/api/auth/register`, dataValue),
+        axios.post(`${process.env.REACT_APP_URL}/api/auth/register`, data),
         {
           pending: 'Processing ...',
           success: 'Register successfully',
@@ -83,7 +79,6 @@ export default function Register() {
               mx: 4,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
             }}
           >
             <Avatar sx={{ m: 1, bgcolor: '#C70039' }}>
@@ -95,7 +90,7 @@ export default function Register() {
             <Box
               component="form"
               noValidate
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit)}
               sx={{ mt: 1 }}
             >
               <TextField
@@ -107,7 +102,25 @@ export default function Register() {
                 name="username"
                 autoComplete="username"
                 autoFocus
+                {...register('username', {
+                  required: true,
+                  pattern: /^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/,
+                })}
               />
+              {errors.username?.type === 'required' && (
+                <Typography
+                  margin="normal"
+                  fullWidth
+                  style={{ color: 'red', fontSize: '13px' }}
+                >
+                  Username is required
+                </Typography>
+              )}
+              {errors.username?.type === 'pattern' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Username/Email format is not true
+                </p>
+              )}
               <TextField
                 margin="normal"
                 required
@@ -116,8 +129,19 @@ export default function Register() {
                 label="Your Nickname"
                 name="nickname"
                 autoComplete="nickname"
-                autoFocus
+                {...register('nickname', {
+                  required: true,
+                })}
               />
+              {errors.nickname?.type === 'required' && (
+                <Typography
+                  margin="normal"
+                  fullWidth
+                  style={{ color: 'red', fontSize: '13px' }}
+                >
+                  Nickname is required
+                </Typography>
+              )}
               <TextField
                 margin="normal"
                 required
@@ -127,7 +151,22 @@ export default function Register() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                {...register('password', {
+                  required: true,
+                  pattern:
+                    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                })}
               />
+              {errors.password?.type === 'required' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Password is required
+                </p>
+              )}
+              {errors.password?.type === 'pattern' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Password format is not true
+                </p>
+              )}
               <TextField
                 margin="normal"
                 required
@@ -137,7 +176,21 @@ export default function Register() {
                 type="password"
                 id="confirmPassword"
                 autoComplete="current-password"
+                {...register('confirmPassword', {
+                  required: true,
+                  validate: (value) => value === watch('password'),
+                })}
               />
+              {errors.confirmPassword?.type === 'required' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Confirm password is required
+                </p>
+              )}
+              {errors.confirmPassword?.type === 'validate' && (
+                <p style={{ color: 'red', fontSize: '13px' }}>
+                  Confirm password is not equal Password
+                </p>
+              )}
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
